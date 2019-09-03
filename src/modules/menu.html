@@ -1,0 +1,6 @@
+<button disabled="{$page === 'third' || !$page}" class="btn-success block margin-bottom-small" on:click="$jump('third')">New sale</button>
+<button disabled="{$page === 'second'}" class="btn-warning block margin-bottom-small" on:click="$jump('second')">Products</button>
+<button disabled="{$page === 'first'}" class="btn-secondary block margin-bottom-small" on:click="$jump('first')">Sales list</button>
+<button disabled="{$page === 'fourth'}" class="btn-warning block margin-bottom-small" on:click="$jump('fourth')">Statistics</button>
+<button disabled="{$page === 'fifth'}" class="btn-secondary block margin-bottom-small" on:click="$jump('fifth')">Users list</button>
+<button disabled="{false}" class="btn-danger block" on:click="$logout()">Log out</button>

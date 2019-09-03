@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf8">
+  <meta name="viewport" content="width=device-width">
+  <title>Sunflower</title>
+  <link rel="stylesheet" href="/bundle.css">
+  <link sizes="16x16 32x32 64x64" href="./img/planete.png" type="image/png" rel="icon">
+</head>
+
+<body class="row flex-center">
+  <div id="splash"><div id="spinner"></div></div>
+  <header class="hidden">
+    <h1>Sunflower</h1>
+  </header>
+  <main class="sm-12 md-8 lg-9 col">
+    <div id="app" onscroll="scroller(this)" class="paper"></div>
+    <i class="totop" onclick="scrolling('app', 'top')">⌃</i>
+    <i class="tobot" onclick="scrolling('app', 'bot')">⌄</i>
+  </main>
+  <aside class="sm-12 md-4 lg-3 col">
+    <nav class="paper">
+      <img src="./img/logo.png" class="no-border" style="opacity:.8;margin:auto;max-height:200px" alt="Sunflower">
+      <h4 class="nav-brand center margin-top-small margin-bottom">Sunflower</h4>
+      <div id="nav"></div>
+      <div class="collapsible">
+        <input id="collapsible-top" type="checkbox" name="collapsible-top">
+        <button id="menu" class="noborder circle noshadow">
+          <label for="collapsible-top">
+            <div class="bar1"></div>
+            <div class="bar2"></div>
+            <div class="bar3"></div>
+          </label>
+        </button>
+        <div class="collapsible-body center paper fixed" id="nav_small">
+          <img src="./img/logo.png" class="no-border" style="opacity:.8;max-width:150px;margin:auto" alt="Sunflower">
+          <h4 class="nav-brand margin-top-small margin-bottom-large">Sunflower</h4>
+        </div>
+      </div>
+    </nav>
+  </aside>
+  <script src="/bundle.js"></script>
+</body>
+
+</html>

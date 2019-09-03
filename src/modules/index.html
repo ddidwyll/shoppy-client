@@ -1,0 +1,319 @@
+<svelte:window on:load="$release()" />
+{#if $page === 'first'}
+<h3 class="center margin hidden">Sales list</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th><span class="nosmall">Summary</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="{Object.keys($orders).length ? 'hidden' : ''}"><td align="center" colspan="4">Today there are no sales yet...</td></tr>
+    {#each Object.entries($orders).sort().reverse() as [index, order]}
+      <tr>
+        <th colspan="3" align="left"><sub>
+          {(new Date(index * 1000)).toLocaleString('en-GB')} by
+          {!!$users[order.who] ? $users[order.who].name : order.who}
+        </sub></th>
+        <th class="hoverable">
+          <button class="nopadding small noborder margin-left noshadow btn-danger" on:click="$confirm('orders', order.id)" disabled="{$me.role !== 5}">
+            Delete
+          </button>
+        </th>
+      </tr>
+      {#each Object.entries(order.vals) as [name, value]}
+      <tr>
+        <td><small>{name}</small></td>
+        <td align="center"><small>{value.pr}</small></td>
+        <td align="center"><small>{value.qt} {!!$products[name] ? $products[name].unit : ''}</small></td>
+        <td align="center"><small>{Math.round(value.qt * value.pr * 100) / 100}</small></td>
+      </tr>
+      {/each}
+      <tr>
+        <td colspan="4" align="right">
+          {Math.round(Object.values(order.vals).reduce((s, p) => p.qt * p.pr + s, 0) * 100) / 100} ლ
+        </td>
+      </tr>
+    {/each}
+  </tbody>
+</table>
+{/if}
+{#if $page === 'second'}
+<h3 class="center margin hidden">Products list</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Price</th>
+      <th>Balance</th>
+      <th>
+        <button class="block nopadding noborder noshadow" on:click="$edit('products')" disabled="{$me.role !== 5}">
+          New
+        </button>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  {#each Object.entries($products) as [id, product]}
+    <tr>
+      <td>{id}</td>
+      <td align="center"><small>{product.price} ლ</small></td>
+      <td align="center"><small class="{product.balance <= 0 ? 'alert-danger circle' : ''}">
+        {product.balance} {!!$products[id] ? $products[id].unit : ''}
+      </small></td>
+      <td rowspan="2" width="80"><img src="/img/{id}" class="noborder" alt="{id}"></td>
+    </tr>
+    <tr>
+      <td class="noborder" align="left"><sup>{product.full}</sup></td>
+      <td class="noborder hoverable" colspan="2" align="center">
+        <button class="nopadding small noborder margin-left noshadow" on:click="$edit('products', id)" disabled="{$me.role !== 5}">
+          Edit
+        </button>
+        <button class="nopadding small noborder margin-left noshadow" on:click="$balance(id)" disabled="{$me.role < 3}">
+          Add
+        </button>
+        <button class="nopadding small noborder margin-left noshadow" on:click="$image(id)" disabled="{$me.role !== 5}">
+          Image
+        </button>
+        <button class="nopadding small noborder margin-left noshadow btn-danger" on:click="$confirm('products', id)" disabled="{$me.role !== 5}">
+          Delete
+        </button>
+      </td>
+    </tr>
+  {/each}
+  </tbody>
+</table>
+{/if}
+{#if $page === 'fifth'}
+<h3 class="center margin hidden">Users list</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Login</th>
+      <th>Phone</th>
+      <th>Role</th>
+      <th>
+        <button class="block nopadding noborder noshadow" on:click="$edit('users')" disabled="{$me.role !== 5}">
+          New user
+        </button>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  {#each Object.entries($users) as [id, user]}
+    <tr>
+      <td><small>{user.name}</small></td>
+      <td align="center"><small>{id}</small></td>
+      <td align="center"><small>{user.phone}</small></td>
+      <td align="center"><small>{user.role === 5 ? 'Admin' : user.role === 3 ? 'Sold' : ''}</small></td>
+      <td align="center">
+        <button class="nopadding noborder margin-left noshadow small" on:click="$edit('users', id)" disabled="{$me.role !== 5 && $me.id !== id}">
+          Edit
+        </button>
+        <button class="nopadding noborder margin-left noshadow small" on:click="$password(id)" disabled="{$me.role !== 5 && $me.id !== id}">
+          Password
+        </button>
+        <button class="nopadding noborder margin-left noshadow btn-danger small" on:click="$confirm('users', id)" disabled="{$me.role !== 5}">
+          Delete
+        </button>
+      </td>
+    </tr>
+  {/each}
+  </tbody>
+</table>
+{/if}
+{#if $page === 'fourth'}
+<h3 class="center margin hidden">Sales statistic</h3>
+<table>
+  <thead>
+    <tr>
+      <th>
+        <input type="number" value="{y}" on:input="set({y:this.value})" step="1" placeholder="Year"
+          min="{(new Date).getFullYear() - 10}"  max="{(new Date).getFullYear()}" class="block nopadding noborder">
+      </th>
+      {#each Object.keys($monthes) as m}<th><small>{$monthes[m]}</small></th>{/each}
+    </tr>
+  </thead>
+  <tbody>
+  {#each Object.entries($products) as [name, product]}
+    <tr>
+      <td>{name} <sup>{product.unit || ''}</sup></td>
+      {#each Object.keys($monthes) as m}
+      <td align="center"><small>{product.stats && product.stats[y] ? product.stats[y][m] || '.' : '.'}</small></td>
+      {/each}
+    </tr>
+  {/each}
+  </tbody>
+</table>
+{/if}
+{#if $page === 'third' || !$page}
+<h3 class="center margin hidden">Basket</h3>
+<table style="margin: 0 auto 8vh">
+  <thead>
+    <tr>
+      <th class="row flex-edges">
+        <span>Product</span>
+        <span class="nosmall">Quantity</span>
+        <span class="nosmall">Price</span>
+        <span class="nosmall">Summary</span>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="{Object.keys($basket).length ? 'hidden' : ''}"><td align="center">Please choose the goods ... </td></tr>
+    {#each Object.entries($basket) as [name, value]}
+    <tr>
+      <td class="row flex-edges flex-middle">
+        <strong on:click="$delProduct(name)" class="click">{name} <sup style="color:red"> x</sup></strong>
+        <input type="number" value="{$basket[name].qt}" min="0" autofocus
+          step="{!!$products[name] && $products[name].unit === 'pts' ? 1 : 0.05}"
+          on:input="$countProduct(name, this.value)"
+          placeholder="0 {!!$products[name] ? $products[name].unit : ''}"
+        >
+        <small class="nosmall">{value.pr} ლ{!!$products[name] ? '/' + $products[name].unit : ''}</small>
+        <small class="nosmall">{Math.round(value.qt * value.pr * 100) / 100 || 0} ლ</small>
+      </td>
+    </tr>
+    {/each}
+    <tr>
+      <td colspan="4" align="right">
+        {$summary} ლ
+      </td>
+    </tr>
+  </tbody>
+  <tfooter class="{!Object.keys($basket).length || !$summary ? 'hidden' : ''}">
+    <button class="btn-block btn-success margin-top" on:click="$addOrder()">Sold!</button>
+  </tfooter>
+</table>
+{#each Object.keys($grouped) as group}
+<div class="collapsible">
+  <input id="collapsible-{group}" type="checkbox" name="collapsible">
+  <label for="collapsible-{group}">{group} ({Object.keys($grouped[group]).length})</label>
+  <div class="collapsible-body row flex-center flex-bottom">
+    {#each $grouped[group] as product}
+    {#if !$basket.hasOwnProperty(product.id)}
+    <div class="col col-fill" id="{product.id}">
+      <div class="card" on:click="$addProduct(product.id)">
+        <img src="/img/{product.id}" alt="{product.full}">
+        <div class="card-body">
+          <h4 class="card-title">{product.id}</h4>
+          <small>{product.full}</small>
+        </div>
+        <div class="card-footer right">{product.price} ლ{!!product.unit ? '/' + product.unit : ''}</div>
+      </div>
+    </div>
+    {/if}
+    {/each}
+  </div>
+</div>
+{/each}
+{/if}
+<input class="modal-state" id="login" type="checkbox">
+<div class="modal">
+  <label class="modal-bg"></label>
+  <div class="modal-body">
+    <h4 class="modal-title">Please, log in</h4>
+    <input type="text" bind:value="$id" autofocus placeholder="Login" class="margin-bottom-large block" on:keydown="$login(event)">
+    <input type="password" bind:value="$pass" placeholder="Password" class="margin-bottom-large block" on:keydown="$login(event)">
+    <div class="modal-text" id="login_errors"></div>
+    <button class="btn-block btn-success margin-top" on:click="$login()" disabled="{!$id || !$pass}">Ok</button>
+  </div>
+</div>
+<input class="modal-state" id="modal" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="modal"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="modal">X</label>
+    <h4 class="modal-title" id="modal_title"></h4>
+    <p class="modal-text" id="modal_text"></p>
+  </div>
+</div>
+<input class="modal-state" id="users" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="users"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="users">X</label>
+    <h4 class="modal-title">{$users.hasOwnProperty($current.id) ? 'Edit' : 'New'} user</h4>
+    <input type="text" bind:value="$current.id" placeholder="Login" class="margin-bottom block" disabled="{$users.hasOwnProperty($current.id)}">
+    <input type="text" bind:value="$current.name" placeholder="Name" class="margin-bottom block">
+    <input type="text" bind:value="$current.phone" placeholder="Phone" class="margin-bottom block">
+    <div class="form-group {$me.role !== 5 ? 'hidden' : ''}">
+      <select id="paperSelects1" bind:value="$current.role" class="block">
+        <option value="{2}">Sold</option>
+        <option value="{5}">Admin</option>
+      <select>
+    </div>
+    <button class="btn-block btn-success margin-top" on:click="$save('users')"
+      disabled="{!$current.id || !$current.name || !$current.role}">Ok
+    </button>
+  </div>
+</div>
+<input class="modal-state" id="products" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="products"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="products">X</label>
+    <h4 class="modal-title">{$users.hasOwnProperty($current.id) ? 'Edit' : 'New'} product</h4>
+    <input type="text" bind:value="$current.id" placeholder="Name" class="margin-bottom block" disabled="{$products.hasOwnProperty($current.id)}">
+    <textarea bind:value="$current.full" placeholder="Description" class="margin-bottom block"></textarea>
+    <input type="text" bind:value="$current.unit" placeholder="Unit" class="margin-bottom block">
+    <input type="text" bind:value="$current.type" placeholder="Type" class="margin-bottom block">
+    <input type="number" bind:value="$current.price" placeholder="Price" class="margin-bottom block" min="0">
+    <button class="btn-block btn-success margin-top" on:click="$save('products')"
+      disabled="{!$current.id || !$current.price}">Ok
+    </button>
+  </div>
+</div>
+<input class="modal-state" id="balance" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="balance"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="balance">X</label>
+    <h4 class="modal-title">Add product</h4>
+    <input type="text" bind:value="$current.id" placeholder="Name" class="margin-bottom block" disabled>
+    <input type="number" bind:value="$current.add" placeholder="Add {$current.unit}" class="margin-bottom block"
+      step="{$current.unit === 'pts' ? 1 : 0.05}" min="0">
+    <button class="btn-block btn-success margin-top" on:click="$saveBalance()"
+      disabled="{!$current.id || !$current.add}">Ok
+    </button>
+  </div>
+</div>
+<input class="modal-state" id="pass" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="pass"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="pass">X</label>
+    <h4 class="modal-title">Change password</h4>
+    <input type="text" bind:value="$current.id" placeholder="Login" class="margin-bottom block" disabled>
+    <input type="password" bind:value="$current.pass" placeholder="New password" class="margin-bottom block">
+    <button class="btn-block btn-success margin-top" on:click="$savePass()"
+      disabled="{!$current.id || !$current.pass}">Ok
+    </button>
+  </div>
+</div>
+<input class="modal-state" id="image" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="image"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="image">X</label>
+    <h4 class="modal-title">Upload image</h4>
+    <input type="text" bind:value="$current.id" placeholder="" class="margin-bottom block" disabled>
+    <input type="file" on:change="$imageUpload(event)" class="block margin-bottom">
+  </div>
+</div>
+<input class="modal-state" id="confirm" type="checkbox">
+<div class="modal">
+  <label class="modal-bg" for="confirm"></label>
+  <div class="modal-body alert alert-primary">
+    <label class="btn-close" for="confirm">X</label>
+    <h4 class="modal-title">Delete confirmation</h4>
+    <p class="modal-text">Are you shure?</p>
+    <input type="text" bind:value="$delYes" placeholder="Type 'yes'" class="margin-bottom block">
+    <button class="btn-block btn-danger margin-top" on:click="$DEL()" disabled="{$delYes.toLowerCase() !== 'yes'}">
+      Delete!
+    </button>
+  </div>
+</div>
