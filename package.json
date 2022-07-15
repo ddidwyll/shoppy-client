@@ -13,7 +13,7 @@
     "rollup-plugin-svelte": "^4.3.2",
     "rollup-plugin-uglify": "^3.0.0",
     "serve": "^6.5.8",
-    "svelte": "^2.15.3",
+    "svelte": "^3.49.0",
     "svelte-preprocess-sass": "^0.1.0"
   },
   "scripts": {
